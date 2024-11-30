@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface GrievanceRepository extends JpaRepository<Grievance, Long> {
     List<Grievance> findByResidentId(Long residentId);
+
+    long countByStatus(String pending);
 }
 
