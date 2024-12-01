@@ -2,6 +2,7 @@ package com.codebuzz.hostel_management.service;
 
 import com.codebuzz.hostel_management.model.Resident;
 import com.codebuzz.hostel_management.repository.ResidentRepository;
+import com.codebuzz.hostel_management.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,9 @@ public class ResidentService {
     @Autowired
     private ResidentRepository repository;
 
+    @Autowired
+    private RoomRepository roomRepository;
+
     public List<Resident> getAllResidents() {
         return repository.findAll();
     }
@@ -27,11 +31,18 @@ public class ResidentService {
         return repository.findById(Id);
     }
 
-    public Resident addResident(Resident resident) {
-        return repository.save(resident);
+    public ResponseEntity<String> addResident(Resident resident) {
+        if (resident.getRoom() != null && !roomRepository.existsById(resident.getRoom().getRoomId())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("given room is not available");
+        }
+        repository.save(resident);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Resident added successfully");
     }
 
     public Resident updateResident(Long id, Resident resident) {
+        if (resident.getRoom() != null && !roomRepository.existsById(resident.getRoom().getRoomId())) {
+            throw new IllegalArgumentException("Room ID does not exist");
+        }
         resident.setId(id);
         return repository.save(resident);
     }
