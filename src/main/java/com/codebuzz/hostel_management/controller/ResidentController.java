@@ -2,9 +2,12 @@ package com.codebuzz.hostel_management.controller;
 
 import com.codebuzz.hostel_management.model.Resident;
 import com.codebuzz.hostel_management.service.ResidentService;
+import com.opencsv.CSVWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,8 +43,8 @@ public class ResidentController {
     }
 
     @GetMapping("/csv/export")
-    public void exportResidentsToCSV() {
-        service.exportResidentsToCSV();
+    public ResponseEntity<byte[]> exportToCSV() throws IOException {
+        return service.exportToCSV();
     }
 }
 

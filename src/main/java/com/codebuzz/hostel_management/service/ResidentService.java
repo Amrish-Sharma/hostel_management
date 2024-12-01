@@ -3,12 +3,14 @@ package com.codebuzz.hostel_management.service;
 import com.codebuzz.hostel_management.model.Resident;
 import com.codebuzz.hostel_management.repository.ResidentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.opencsv.CSVWriter;
+import com.opencsv.*;
 
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,31 +40,45 @@ public class ResidentService {
         repository.deleteById(id);
     }
 
-    public void exportResidentsToCSV() {
-        List<Resident> residents = getAllResidents();
-        try (CSVWriter writer = new CSVWriter(new FileWriter("residents.csv"))) {
-            // Write header
-            writer.writeNext(new String[]{"ID", "Name", "Email", "Phone", "Address", "Status", "Room ID"});
+    public ResponseEntity<byte[]> exportToCSV() throws IOException {
+        // Fetch the list of residents from the database
+        List<Resident> residents = repository.findAll();
 
-            // Write data
-            for (Resident resident : residents) {
-                writer.writeNext(new String[]{
-                        resident.getId().toString(),
-                        resident.getName(),
-                        resident.getEmail(),
-                        resident.getPhone(),
-                        resident.getAddress(),
-                        resident.getStatus(),
-                        resident.getRoom() != null ? resident.getRoom().getId().toString() : ""
-                });
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        // Prepare an in-memory output stream for CSV data
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+        CSVWriter csvWriter = new CSVWriter(writer);
+
+        // Define the CSV header
+        String[] header = {"ID", "Name", "Room Number", "Email", "Phone", "Status"};
+        csvWriter.writeNext(header);
+
+        // Write resident data rows
+        for (Resident resident : residents) {
+            String[] residentData = {
+                    String.valueOf(resident.getId()),
+                    resident.getName(),
+                    resident.getRoom().getRoomId().toString(),
+                    resident.getEmail(),
+                    resident.getPhone(),
+                    resident.getStatus()
+            };
+            csvWriter.writeNext(residentData);
         }
+
+        // Flush and close the CSVWriter
+        csvWriter.flush();
+
+        // Convert the output to a byte array
+        byte[] csvData = outputStream.toByteArray();
+
+        // Return the byte array as a downloadable CSV file
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=residents.csv")
+                .contentType(org.springframework.http.MediaType.parseMediaType("text/csv"))
+                .body(csvData);
     }
-
-
-
 }
+
 
 

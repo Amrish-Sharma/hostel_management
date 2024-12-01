@@ -75,6 +75,5 @@ public class Resident {
     @JoinColumn(name = "room_id")
     private Room room;
 
-    // Getters and Setters
 }
 
