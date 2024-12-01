@@ -38,5 +38,10 @@ public class ResidentController {
     public void deleteResident(@PathVariable Long id) {
         service.deleteResident(id);
     }
+
+    @GetMapping("/csv/export")
+    public void exportResidentsToCSV() {
+        service.exportResidentsToCSV();
+    }
 }
 
