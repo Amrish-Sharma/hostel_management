@@ -15,6 +15,11 @@ public class RoomController {
     @Autowired
     private RoomService roomService;
 
+    @GetMapping
+    public ResponseEntity<List<Room>> getAllRooms() {
+        return new ResponseEntity<>(roomService.getAllRooms(), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<Room> createRoom(@RequestBody Room room) {
         return new ResponseEntity<>(roomService.createRoom(room), HttpStatus.CREATED);
@@ -23,6 +28,13 @@ public class RoomController {
     @GetMapping("/available")
     public ResponseEntity<List<Room>> getAvailableRooms() {
         return new ResponseEntity<>(roomService.getAvailableRooms(), HttpStatus.OK);
+    }
+
+    // delete a room by roomId
+    @DeleteMapping("/{roomId}")
+    public ResponseEntity<Void> deleteRoom(@PathVariable Long roomId) {
+        roomService.deleteRoom(roomId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
 

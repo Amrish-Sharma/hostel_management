@@ -18,4 +18,12 @@ public class RoomService {
     public List<Room> getAvailableRooms() {
         return roomRepository.findByStatus("Available");
     }
+
+    public List<Room> getAllRooms() {
+        return roomRepository.findAll();
+    }
+
+    public void deleteRoom(Long roomId) {
+        roomRepository.deleteById(roomId);
+    }
 }
