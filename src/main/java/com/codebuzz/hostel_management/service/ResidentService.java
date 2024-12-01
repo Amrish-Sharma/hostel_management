@@ -6,25 +6,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ResidentService {
     @Autowired
-    private ResidentRepository residentRepository;
+    private ResidentRepository repository;
 
-    public Resident registerResident(Resident resident) {
-        return residentRepository.save(resident);
+    public List<Resident> getAllResidents() {
+        return repository.findAll();
     }
 
-    public List<Resident> getAllActiveResidents() {
-        return residentRepository.findByStatus("Active");
+    public Optional<Resident> getResidentById(Long Id) {
+        return repository.findById(Id);
     }
 
-    public void deactivateResident(Long id) {
-        Resident resident = residentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Resident not found"));
-        resident.setStatus("Inactive");
-        residentRepository.save(resident);
+    public Resident addResident(Resident resident) {
+        return repository.save(resident);
+    }
+
+    public Resident updateResident(Long id, Resident resident) {
+        resident.setId(id);
+        return repository.save(resident);
+    }
+
+    public void deleteResident(Long id) {
+        repository.deleteById(id);
     }
 }
 

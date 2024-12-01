@@ -3,32 +3,40 @@ package com.codebuzz.hostel_management.controller;
 import com.codebuzz.hostel_management.model.Resident;
 import com.codebuzz.hostel_management.service.ResidentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/residents")
 public class ResidentController {
     @Autowired
-    private ResidentService residentService;
+    private ResidentService service;
+
+    @GetMapping
+    public List<Resident> getAllResidents() {
+        return service.getAllResidents();
+    }
 
     @PostMapping
-    public ResponseEntity<Resident> registerResident(@RequestBody Resident resident) {
-        return new ResponseEntity<>(residentService.registerResident(resident), HttpStatus.CREATED);
+    public Resident addResident(@RequestBody Resident resident) {
+        return service.addResident(resident);
     }
 
-    @GetMapping("/active")
-    public ResponseEntity<List<Resident>> getActiveResidents() {
-        return new ResponseEntity<>(residentService.getAllActiveResidents(), HttpStatus.OK);
+    @PutMapping("/{id}")
+    public Resident updateResident(@PathVariable Long id, @RequestBody Resident resident) {
+        return service.updateResident(id, resident);
     }
 
-    @PutMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivateResident(@PathVariable Long id) {
-        residentService.deactivateResident(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @GetMapping("/{id}")
+    public Optional<Resident> getResidentById(@PathVariable Long id) {
+        return service.getResidentById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteResident(@PathVariable Long id) {
+        service.deleteResident(id);
     }
 }
 
