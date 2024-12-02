@@ -1,5 +1,6 @@
 package com.codebuzz.hostel_management.controller;
 
+import com.codebuzz.hostel_management.model.Resident;
 import com.codebuzz.hostel_management.model.Room;
 import com.codebuzz.hostel_management.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -25,9 +27,19 @@ public class RoomController {
         return new ResponseEntity<>(roomService.createRoom(room), HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    public Room updateRoom(@PathVariable Long id, @RequestBody Room room) {
+        return roomService.updateRoom(id, room);
+    }
+
     @GetMapping("/available")
     public ResponseEntity<List<Room>> getAvailableRooms() {
         return new ResponseEntity<>(roomService.getAvailableRooms(), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public Optional<Room> getRoomById(@PathVariable Long id) {
+        return roomService.getRoomById(id);
     }
 
     // delete a room by roomId
