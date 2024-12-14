@@ -48,5 +48,10 @@ public class RoomController {
         roomService.deleteRoom(roomId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    @PutMapping("/{roomId}/assignResident/{residentId}")
+    public Room assignResidentToRoom(@PathVariable Long roomId, @PathVariable Long residentId) {
+        return roomService.assignResidentToRoom(roomId, residentId);
+    }
+
 }
 

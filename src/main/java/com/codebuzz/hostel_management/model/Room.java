@@ -1,6 +1,10 @@
 package com.codebuzz.hostel_management.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "rooms")
@@ -8,6 +12,11 @@ public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Resident> residents = new ArrayList<>();
+
     private String type; // Single/Double
     private double rent;
     private int capacity;
@@ -60,6 +69,14 @@ public class Room {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<Resident> getResidents() {
+        return residents;
+    }
+
+    public void setResidents(List<Resident> residents) {
+        this.residents = residents;
     }
 
 }

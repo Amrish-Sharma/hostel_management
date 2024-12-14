@@ -23,7 +23,7 @@ public class ResidentController {
     }
 
     @PostMapping
-    public ResponseEntity<String> addResident(@RequestBody Resident resident) {
+    public ResponseEntity<Resident> addResident(@RequestBody Resident resident) {
         return service.addResident(resident);
     }
 

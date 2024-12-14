@@ -1,5 +1,6 @@
 package com.codebuzz.hostel_management.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,6 +10,17 @@ public class Resident {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private String email;
+    private String phone;
+    private String address;
+    private String status; // Active/Inactive
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", insertable = false, updatable = false)
+    @JsonBackReference
+    private Room room;
+
+
+
 
     public Long getId() {
         return id;
@@ -58,22 +70,27 @@ public class Resident {
         this.status = status;
     }
 
+
     public Room getRoom() {
         return room;
     }
 
-    public void setRoom(Room room) {
-        this.room = room;
+    public void setRoom(Room roomId) {
+        this.room= room;
     }
 
-    private String email;
-    private String phone;
-    private String address;
-    private String status; // Active/Inactive
 
-    @OneToOne
-    @JoinColumn(name = "room_id")
-    private Room room;
+
+    public Long getRoomId() {
+        return room != null ? room.getRoomId() : null;
+    }
+
+    public void setRoomId(Long roomId) {
+        if (room == null) {
+            room = new Room();
+        }
+        room.setRoomId(roomId);
+    }
 
 }
 
