@@ -47,12 +47,6 @@ public class RoomService {
         return roomRepository.findById(id);
     }
 
-    public List<Resident> getResidentsByRoomId(Long roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
-        return room.getResidents();
-    }
-
     public void deleteRoom(Long roomId) {
         roomRepository.deleteById(roomId);
     }
@@ -61,27 +55,58 @@ public class RoomService {
         // Fetch the room by ID or throw exception if not found
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with ID: " + roomId));
-
         // Fetch the resident by ID or throw exception if not found
         Resident resident = residentRepository.findById(residentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resident not found with ID: " + residentId));
-
         // Check if the room has available capacity
         if (room.getOccupied() >= room.getCapacity()) {
             throw new IllegalArgumentException("Cannot assign resident: Room capacity exceeded");
         }
 
         // Assign resident to room
+        resident.setRoomId(roomId);
+        residentRepository.save(resident);
+
         room.getResidents().add(resident);
+
+        System.out.println("roomResidents After Addition"+room.getResidents().stream().toString());
+
 
         // Update room occupancy and status
         room.setOccupied(room.getOccupied() + 1);
         room.setStatus(room.getOccupied() == room.getCapacity() ? "Occupied" : "Available");
 
         // Save and return the updated room
+
         return roomRepository.save(room);
     }
 
+    public void vacateRoom(Long roomId, Long residentId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found with ID: " + roomId));
+
+        Resident resident = residentRepository.findById(residentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resident not found with ID: " + residentId));
+
+        // Remove resident from the room
+        if (room.getResidents().remove(resident)) {
+            // Update room occupancy
+            room.setOccupied(room.getOccupied() - 1);
+
+            // Update room status
+            if (room.getOccupied() == 0) {
+                room.setStatus("Available");
+            }
+
+            roomRepository.save(room);
+
+            // Optionally, clear the room assignment in Resident entity
+            resident.setRoom(null);
+            residentRepository.save(resident);
+        } else {
+            throw new IllegalArgumentException("Resident is not assigned to this room.");
+        }
+    }
 
 
 }

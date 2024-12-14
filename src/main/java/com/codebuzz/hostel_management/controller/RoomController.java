@@ -1,5 +1,6 @@
 package com.codebuzz.hostel_management.controller;
 
+import com.codebuzz.hostel_management.exception.ResourceNotFoundException;
 import com.codebuzz.hostel_management.model.Resident;
 import com.codebuzz.hostel_management.model.Room;
 import com.codebuzz.hostel_management.service.RoomService;
@@ -51,6 +52,18 @@ public class RoomController {
     @PutMapping("/{roomId}/assignResident/{residentId}")
     public Room assignResidentToRoom(@PathVariable Long roomId, @PathVariable Long residentId) {
         return roomService.assignResidentToRoom(roomId, residentId);
+    }
+
+    @PutMapping("/{roomId}/vacate/{residentId}")
+    public ResponseEntity<String> vacateRoom(@PathVariable Long roomId, @PathVariable Long residentId) {
+        try {
+            roomService.vacateRoom(roomId, residentId);
+            return ResponseEntity.ok("Resident removed from room successfully.");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+        }
     }
 
 }

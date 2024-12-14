@@ -48,10 +48,6 @@ public class ResidentService {
             Long roomId = Long.parseLong(resident.getRoomId().toString());
             System.out.println("Room ID: " + roomId);
 
-            // Check if the room exists
-            Room room = roomRepository.findById(roomId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Room not found with ID: " + roomId));
-
             // Save the resident
             Resident savedResident = repository.save(resident);
 
@@ -166,6 +162,7 @@ public class ResidentService {
                 .contentType(org.springframework.http.MediaType.parseMediaType("text/csv"))
                 .body(csvData);
     }
+
 }
 
 
