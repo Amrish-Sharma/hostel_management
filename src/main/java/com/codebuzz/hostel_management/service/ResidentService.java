@@ -1,5 +1,6 @@
 package com.codebuzz.hostel_management.service;
 
+import com.codebuzz.hostel_management.exception.ResourceNotFoundException;
 import com.codebuzz.hostel_management.model.Resident;
 import com.codebuzz.hostel_management.model.Room;
 import com.codebuzz.hostel_management.repository.ResidentRepository;
@@ -22,6 +23,9 @@ public class ResidentService {
     private ResidentRepository repository;
 
     @Autowired
+    private RoomService roomService;
+
+    @Autowired
     private RoomRepository roomRepository;
 
     public List<Resident> getAllResidents() {
@@ -34,35 +38,43 @@ public class ResidentService {
 
     public ResponseEntity<Resident> addResident(Resident resident) {
         System.out.println("I AM GETTING THIS VALUE " + resident.getRoomId());
-        if (resident.getRoomId() != null) {
-            Long roomId = Long.parseLong(resident.getRoomId().toString());
-            System.out.println("Room ID: " + roomId);
-            if (!roomRepository.existsById(roomId)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
 
-            Room room = roomRepository.findById(roomId).orElse(null);
-            if (room != null) {
-                if (room.getOccupied() >= room.getCapacity()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-                }
-                room.setOccupied(room.getOccupied() + 1);
-                if (room.getOccupied() == room.getCapacity()) {
-                    room.setStatus("Occupied");
-                } else {
-                    room.setStatus("Available");
-                }
-                room.getResidents().add(resident); // Add resident to the room's list of residents
-                roomRepository.save(room);
-                resident.setRoom(room);
-            }
-            Resident savedResident = repository.save(resident);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedResident);
+        if (resident.getRoomId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null); // Room ID is required
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        try {
+            Long roomId = Long.parseLong(resident.getRoomId().toString());
+            System.out.println("Room ID: " + roomId);
 
+            // Check if the room exists
+            Room room = roomRepository.findById(roomId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Room not found with ID: " + roomId));
+
+            // Save the resident
+            Resident savedResident = repository.save(resident);
+
+            // Assign the resident to the room
+            roomService.assignResidentToRoom(roomId, savedResident.getId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedResident);
+
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid Room ID format: " + resident.getRoomId());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (ResourceNotFoundException e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            System.err.println("Unexpected error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
+
 
     public Resident updateResident(Long id, Resident resident) {
         Resident existingResident = repository.findById(id).orElse(null);

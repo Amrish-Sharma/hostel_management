@@ -47,38 +47,41 @@ public class RoomService {
         return roomRepository.findById(id);
     }
 
+    public List<Resident> getResidentsByRoomId(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
+        return room.getResidents();
+    }
+
     public void deleteRoom(Long roomId) {
         roomRepository.deleteById(roomId);
     }
 
     public Room assignResidentToRoom(Long roomId, Long residentId) {
+        // Fetch the room by ID or throw exception if not found
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
-        Resident resident = residentRepository.findById(residentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Resident not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found with ID: " + roomId));
 
-        // Check if the room has capacity for the new resident
+        // Fetch the resident by ID or throw exception if not found
+        Resident resident = residentRepository.findById(residentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resident not found with ID: " + residentId));
+
+        // Check if the room has available capacity
         if (room.getOccupied() >= room.getCapacity()) {
-            throw new IllegalArgumentException("Room capacity exceeded");
+            throw new IllegalArgumentException("Cannot assign resident: Room capacity exceeded");
         }
 
-        // Check if the room type allows adding this resident
-        // Add the resident to the room's resident list
+        // Assign resident to room
         room.getResidents().add(resident);
 
-        // Update the number of occupied slots
+        // Update room occupancy and status
         room.setOccupied(room.getOccupied() + 1);
+        room.setStatus(room.getOccupied() == room.getCapacity() ? "Occupied" : "Available");
 
-        // Update room status if fully occupied
-        if (room.getOccupied() == room.getCapacity()) {
-            room.setStatus("Occupied");
-        } else {
-            room.setStatus("Available");
-        }
-
-        // Save the room
+        // Save and return the updated room
         return roomRepository.save(room);
     }
+
 
 
 }

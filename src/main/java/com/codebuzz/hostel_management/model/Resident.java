@@ -15,7 +15,7 @@ public class Resident {
     private String address;
     private String status; // Active/Inactive
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", insertable = false, updatable = false)
+    @JoinColumn(name = "room_id")
     @JsonBackReference
     private Room room;
 
@@ -75,7 +75,7 @@ public class Resident {
         return room;
     }
 
-    public void setRoom(Room roomId) {
+    public void setRoom(Room room) {
         this.room= room;
     }
 
@@ -90,6 +90,7 @@ public class Resident {
             room = new Room();
         }
         room.setRoomId(roomId);
+
     }
 
 }
