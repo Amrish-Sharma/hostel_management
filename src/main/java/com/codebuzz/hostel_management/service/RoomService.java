@@ -2,11 +2,15 @@ package com.codebuzz.hostel_management.service;
 
 import com.codebuzz.hostel_management.model.Resident;
 import com.codebuzz.hostel_management.model.Room;
+import com.codebuzz.hostel_management.model.RoomOccupancyHistory;
 import com.codebuzz.hostel_management.repository.RoomRepository;
 import com.codebuzz.hostel_management.repository.ResidentRepository;
+import com.codebuzz.hostel_management.repository.RoomOccupancyHistoryRepository;
 import com.codebuzz.hostel_management.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +21,9 @@ public class RoomService {
 
     @Autowired
     private ResidentRepository residentRepository;
+
+    @Autowired
+    private RoomOccupancyHistoryRepository roomOccupancyHistoryRepository;
 
     public Room createRoom(Room room) {
         return roomRepository.save(room);
@@ -75,6 +82,13 @@ public class RoomService {
         // Update room occupancy and status
         room.setOccupied(room.getOccupied() + 1);
         room.setStatus(room.getOccupied() == room.getCapacity() ? "Occupied" : "Available");
+        // room occupancy
+        RoomOccupancyHistory history = new RoomOccupancyHistory();
+        history.setRoom(room);
+        history.setResident(resident);
+        history.setAllottedAt(LocalDateTime.now());
+        roomOccupancyHistoryRepository.save(history);
+
 
         // Save and return the updated room
 
@@ -94,7 +108,7 @@ public class RoomService {
             room.setOccupied(room.getOccupied() - 1);
 
             // Update room status
-            if (room.getOccupied() == 0) {
+            if (room.getOccupied() < room.getCapacity()) {
                 room.setStatus("Available");
             }
 
@@ -103,9 +117,19 @@ public class RoomService {
             // Optionally, clear the room assignment in Resident entity
             resident.setRoom(null);
             residentRepository.save(resident);
+
+            RoomOccupancyHistory history = roomOccupancyHistoryRepository.findByRoomAndResidentAndVacatedAtIsNull(room, resident)
+                    .orElseThrow(() -> new IllegalArgumentException("No active occupancy record found for this resident in the room"));
+            history.setVacatedAt(LocalDateTime.now());
+            roomOccupancyHistoryRepository.save(history);
+
         } else {
             throw new IllegalArgumentException("Resident is not assigned to this room.");
         }
+    }
+
+    public List<RoomOccupancyHistory> getRoomOccupancyHistory(Long roomId) {
+        return roomOccupancyHistoryRepository.findByRoomId(roomId);
     }
 
 

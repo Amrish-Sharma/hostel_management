@@ -3,6 +3,8 @@ package com.codebuzz.hostel_management.controller;
 import com.codebuzz.hostel_management.exception.ResourceNotFoundException;
 import com.codebuzz.hostel_management.model.Resident;
 import com.codebuzz.hostel_management.model.Room;
+import com.codebuzz.hostel_management.model.RoomOccupancyHistory;
+import com.codebuzz.hostel_management.repository.RoomOccupancyHistoryRepository;
 import com.codebuzz.hostel_management.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,9 @@ import java.util.Optional;
 public class RoomController {
     @Autowired
     private RoomService roomService;
+
+    @Autowired
+    private RoomOccupancyHistoryRepository roomOccupancyHistoryRepository;
 
     @GetMapping
     public ResponseEntity<List<Room>> getAllRooms() {
@@ -65,6 +70,12 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/{roomId}/occupancy-history")
+    public List<RoomOccupancyHistory> getRoomOccupancyHistory(@PathVariable Long roomId) {
+        return roomOccupancyHistoryRepository.findByRoomId(roomId);
+    }
+
 
 }
 

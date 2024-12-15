@@ -1,5 +1,6 @@
 package com.codebuzz.hostel_management.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "rooms")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
