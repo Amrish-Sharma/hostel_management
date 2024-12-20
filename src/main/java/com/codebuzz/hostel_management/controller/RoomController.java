@@ -71,8 +71,9 @@ public class RoomController {
         }
     }
 
-    @GetMapping("/{roomId}/occupancy-history")
+    @GetMapping("/occupancy-history/{roomId}")
     public List<RoomOccupancyHistory> getRoomOccupancyHistory(@PathVariable Long roomId) {
+        System.out.println("roomId = " + roomId);
         return roomOccupancyHistoryRepository.findByRoomId(roomId);
     }
 
