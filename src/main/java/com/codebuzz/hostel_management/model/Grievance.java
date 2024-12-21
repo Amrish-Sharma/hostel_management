@@ -12,6 +12,18 @@ public class Grievance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "room_id", nullable = true)
+    private Room room;
+
     public Long getId() {
         return id;
     }
@@ -64,6 +76,17 @@ public class Grievance {
     private String description;
     private String status; // Pending/In Progress/Resolved
     private LocalDateTime createdAt;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    private String type;
+
 
     @ManyToOne
     @JoinColumn(name = "resident_id")
