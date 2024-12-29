@@ -1,6 +1,8 @@
 package com.codebuzz.hostel_management.controller;
 
 import com.codebuzz.hostel_management.model.User;
+import com.codebuzz.hostel_management.model.UserRequest;
+import com.codebuzz.hostel_management.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

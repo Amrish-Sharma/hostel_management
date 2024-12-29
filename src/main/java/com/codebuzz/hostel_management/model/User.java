@@ -18,10 +18,13 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "role")
-    private Set<String> roles = new HashSet<>();
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "user_roles", // Join table name
+            joinColumns = @JoinColumn(name = "user_id"), // Map to User's primary key
+            inverseJoinColumns = @JoinColumn(name = "role_id") // Map to Role's primary key
+    )
+    private Set<Role> roles = new HashSet<>();
 
     // Getters and setters
     public Long getId() {
@@ -48,11 +51,11 @@ public class User {
         this.password = password;
     }
 
-    public Set<String> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<String> roles) {
+    public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 }

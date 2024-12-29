@@ -25,10 +25,15 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
+    // Generate Token with default claims
     public String generateToken(Authentication authentication) {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", userPrincipal.getUsername());
+        return generateTokenFromClaims(userPrincipal.getUsername(), new HashMap<>());
+    }
+
+    // Generate Token with custom claims (for flexibility)
+    public String generateTokenFromClaims(String username, Map<String, Object> claims) {
+        claims.put("sub", username);
         claims.put("created", new Date());
 
         return Jwts.builder()
@@ -36,5 +41,42 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    // Validate the token
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // Token expired
+            return false;
+        } catch (io.jsonwebtoken.JwtException e) {
+            // Token invalid
+            return false;
+        }
+    }
+
+    // Extract `username` (subject) from the token
+    public String extractUsername(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    // Get expiration date for the token
+    public Date getExpirationDate(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
     }
 }
